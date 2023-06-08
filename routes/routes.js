@@ -25,6 +25,7 @@ router.get('/', function(req,res){
 // Login
 
 router.post("/login", login);
+// #region Usuarios
 
 // USUARIOS
 
@@ -48,6 +49,9 @@ router.put('/users/:id', updateUser);
 
 router.delete('/users/:id', deleteUser);
 
+// #endregion
+
+// #region Contactos
 // CONTACTOS
 
 // Leer contactos por Id de usuario
@@ -56,15 +60,16 @@ router.get('/users/contacts/:id', verifyToken ,getContactsByUserId);
 
 // Crear un contacto
 
-router.post('/users/contacts/:id/', createContact);
+router.post('/users/contacts/:id/', verifyToken, createContact);
 
 // Modificar un contacto
 
-router.put('/users/contacts/:id/:idcontact', updateContact);
+router.put('/users/contacts/:id/:idcontact', verifyToken, updateContact);
 
 // Borrar contacto
 
-router.delete('/users/contacts/:id/:idcontact', deleteContact);
+router.delete('/users/contacts/:id/:idcontact',verifyToken, deleteContact);
+//#endregion
 
 // EXTRAS
 
