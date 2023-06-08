@@ -1,3 +1,4 @@
+const { verify } = require('crypto');
 const { Router } = require('express');
 const router = Router();
 const path = require('path');
@@ -12,6 +13,7 @@ const {
     updateContact,
     deleteContact,
     login,
+    verifyToken,
 } = require('../controllers/controllers.js');
 
 // index
@@ -50,7 +52,7 @@ router.delete('/users/:id', deleteUser);
 
 // Leer contactos por Id de usuario
 
-router.get('/users/contacts/:id', getContactsByUserId);
+router.get('/users/contacts/:id', verifyToken ,getContactsByUserId);
 
 // Crear un contacto
 

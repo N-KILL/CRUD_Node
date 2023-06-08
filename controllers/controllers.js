@@ -1,5 +1,8 @@
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const express = require("express");
+const { application } = require('express');
+
 
 //conexion con la base de datos
 
@@ -13,22 +16,32 @@ const pool = new Pool({
 
 // Login 
 
+
+function verifyToken(req,res,next){
+    const bearerHeader =  req.headers['authorization'];
+    if(typeof bearerHeader !== 'undefined'){
+        baererToken = bearerHeader.split(" ")[1];
+        req.token = baererToken
+        next()
+    }else{
+        res.sendStatus(403);
+    }
+}
+
 const login = async (req, res) => {
     const {nombre, email} = req.body
     const user = await pool.query("SELECT * FROM users WHERE nombre = $1 AND email = $2", [nombre, email])
-    if (user.rows.length != 0){
-        jwt.sign({user: user}, 'secretKey', (err,token) =>{
-            token: token
-            res.status(200).json({
+    if(user.rows.length !=0){
+        if(user.rows != 'undefined'){
+            const token = jwt.sign({
+                user: user.rows
+            }, "secretKey", {expiresIn: '60s'})
+            res.send({
                 token,
-                user : user.rows
-            }
-            );
-        })
-    } else {
-        console.log("Fallo al iniciar sesion")
-        res.status(401).json(false)
-    };
+                user: user.rows
+            })
+        }
+    }
 }
 
 
@@ -89,10 +102,20 @@ const deleteUser = async (req, res) => {
 
 //Consultar los contactos por el id del usuario
 
-const getContactsByUserId = async (req, res) => {
-    const id = (req.params.id);
+
+const getContactsByUserId =  async (req, res) => {
+    const id = req.params.id
     const response = await pool.query('SELECT * FROM contacts WHERE userid = $1', [id]);
-    res.json(response.rows);
+    jwt.verify(req.token, 'secretKey',(error, authData) => {
+        if (error){
+            res.sendStatus(403);
+        }else{
+            res.json({
+                mensaje: "Contactos: ",
+                response : response.rows,
+            })
+            }
+        })
 };
 
 // Crear un contacto
@@ -149,4 +172,5 @@ module.exports = {
     updateContact,
     deleteContact,
     login,
+    verifyToken,
 };
