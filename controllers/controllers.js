@@ -2,7 +2,6 @@ const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const { response } = require('express');
 
-
 //conexion con la base de datos
 
 const pool = new Pool({
