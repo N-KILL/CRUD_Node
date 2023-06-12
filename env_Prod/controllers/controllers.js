@@ -183,24 +183,12 @@ const getContactsByUserId =  async (req, res) => {
 //Consultar los contactos por el id del usuario y si son favoritos
 
 const getContactsByUserIdAndFav =  async (req, res) => {
-    try {
-        const id = req.params.id
-        const response = await contactos.findAll({where:{userid:id,favorito:true}});
-        if (response.length !== 0){
-            res.json({
-                mensaje: "Contactos favoritos: ",
-                response : response,
-            })
-        }else{ 
-            res.json({
-                mensaje: "El usuario ingresado no existe"
-            })
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message});
-    }
-
-    
+    const id = req.params.id
+    const response = await contactos.findAll({where:{userid:id,favorito:1}});
+    res.json({
+        mensaje: "Contactos: ",
+        response : response,
+    })
 };
 // Crear un contacto
 
@@ -242,28 +230,20 @@ const createContact = async (req, res) => {
 const updateContact = async (req, res) => {
     try {
         const id = parseInt(req.params.idcontact);
-        const { nombre, telefono,email,direccion,favorito,userid} = req.body;
+        const { nombre, telefono,email } = req.body;
+        console.log(nombre, telefono,email)
         const response = await contactos.findByPk(id)
-        if (response.length !== 0){
-            response.nombre = nombre
-            response.telefono = telefono
-            response.email = email
-            response.direccion = direccion,
-            response.favorito = favorito,
-            response.userid = userid
-            await response.save()
-            res.json({
-                message: 'User Updated Successfully',
-                body:{
-                    response
-                }
-            });
-        }else{ 
-            res.json({
-                mensaje: "El contacto ingresado no existe"
-            })
-        }
-        
+        console.log(response)
+        response.nombre = nombre
+        response.telefono = telefono
+        response.email = email
+        await response.save()
+        res.json({
+            message: 'User Updated Successfully',
+            body:{
+                response
+            }
+        });
     } catch (error) {
         res.status(500).json({ message: error.message});
     }
