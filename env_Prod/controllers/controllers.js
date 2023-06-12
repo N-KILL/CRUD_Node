@@ -44,7 +44,14 @@ const login = async (req, res) => {
 const getUsers = async (req, res) => {
     try {
         const response = await usuarios.findAll()
-        res.status(200).json(response);
+        if (response.length !== 0){
+            res.status(200).json(response);
+        }else{
+            res.json({
+                mensaje: "No se encontraron usuarios"
+            })
+        }
+        
     } catch (error) {
         res.status(500).json({ message: error.message});
     }
@@ -57,7 +64,13 @@ const getUserById = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         const response = await usuarios.findByPk(id);
-        res.json(response);
+        if (response.length !== 0){
+            res.status(200).json(response);
+        }else{
+            res.json({
+                mensaje: "No se encontraron usuarios"
+            })
+        }
     } catch (error) {
         res.status(500).json({ message: error.message});
     }
@@ -93,15 +106,21 @@ const updateUser = async (req, res) => {
         const { id } = req.params;
         const { nombre, email } = req.body;
         const response = await usuarios.findByPk(id)
-        response.nombre = nombre
-        response.email = email
-        await response.save()
-        res.json({
-            message: 'User Updated Successfully',
-            body:{
-                response
-            }
-        });
+        if (response.length !== 0){
+            response.nombre = nombre
+            response.email = email
+            await response.save()
+            res.json({
+                message: 'User Updated Successfully',
+                body:{
+                    response
+                }
+            });
+        }else{
+            res.json({
+                mensaje: "No se encontraron usuarios"
+            })
+        }
     } catch (error) {
         res.status(500).json({ message: error.message});
     }
@@ -116,14 +135,21 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        await usuarios.destroy({
-            where: {
-                id: id,
-            }
-        })
-        res.json({
-            mensaje: "Usuario eliminado correctamente",
-        }); 
+        const verify = await usuarios.findByPk(id)
+        if (verify.length !== 0){
+            await usuarios.destroy({
+                where: {
+                    id: id,
+                }
+            })
+            res.json({
+                mensaje: "Usuario eliminado correctamente",
+            }); 
+        }else{
+            res.json({
+                mensaje: "No se encontro el usuario"
+            })
+        }
     } catch (error) {
         res.status(500).json({ message: error.message});
     }
@@ -134,42 +160,79 @@ const deleteUser = async (req, res) => {
 
 
 const getContactsByUserId =  async (req, res) => {
-    const id = req.params.id
-    const response = await contactos.findAll({where:{userid:id}});
-    res.json({
-        mensaje: "Contactos: ",
-        response : response,
-    })
+    try {
+        const id = req.params.id
+        const response = await contactos.findAll({where:{userid:id}});
+        const verify = await usuarios.findByPk(id)
+        if (verify.length !== 0){
+            res.json({
+                mensaje: "Contactos: ",
+                response : response,
+            })
+        }else{ 
+            res.json({
+                mensaje: "El usuario ingresado no existe"
+            })
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+    
 };
 
 //Consultar los contactos por el id del usuario y si son favoritos
 
 const getContactsByUserIdAndFav =  async (req, res) => {
-    const id = req.params.id
-    const response = await contactos.findAll({where:{userid:id,favorito:1}});
-    res.json({
-        mensaje: "Contactos: ",
-        response : response,
-    })
+    try {
+        const id = req.params.id
+        const response = await contactos.findAll({where:{userid:id,favorito:true}});
+        if (response.length !== 0){
+            res.json({
+                mensaje: "Contactos favoritos: ",
+                response : response,
+            })
+        }else{ 
+            res.json({
+                mensaje: "El usuario ingresado no existe"
+            })
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+
+    
 };
 // Crear un contacto
 
 const createContact = async (req, res) => {
+    try {
         const userId = parseInt(req.params.id);
-        const { nombre , telefono, email, direccion, favorito} = req.body;
-        const response = await contactos.create({
-            nombre: nombre,
-            telefono: telefono,
-            email:email,
-            direccion: direccion,
-            favorito: favorito,
-            userid: userId
-        });
-        res.json({
-            message: 'Se añadio el contacto',
-            body: {
-                contacto: response
-            }});
+        const verify = await usuarios.findByPk(userId); 
+        if (verify.length !== 0){
+            const { nombre , telefono, email, direccion, favorito} = req.body;
+            const response = await contactos.create({
+                nombre: nombre,
+                telefono: telefono,
+                email:email,
+                direccion: direccion,
+                favorito: favorito,
+                userid: userId
+            });
+            res.json({
+                message: 'Se añadio el contacto',
+                body: {
+                    contacto: response
+                }});
+        }else{ 
+            res.json({
+                mensaje: "El usuario ingresado no existe"
+            })
+        }
+        
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+        
 };
 
 
@@ -179,20 +242,28 @@ const createContact = async (req, res) => {
 const updateContact = async (req, res) => {
     try {
         const id = parseInt(req.params.idcontact);
-        const { nombre, telefono,email } = req.body;
-        console.log(nombre, telefono,email)
+        const { nombre, telefono,email,direccion,favorito,userid} = req.body;
         const response = await contactos.findByPk(id)
-        console.log(response)
-        response.nombre = nombre
-        response.telefono = telefono
-        response.email = email
-        await response.save()
-        res.json({
-            message: 'User Updated Successfully',
-            body:{
-                response
-            }
-        });
+        if (response.length !== 0){
+            response.nombre = nombre
+            response.telefono = telefono
+            response.email = email
+            response.direccion = direccion,
+            response.favorito = favorito,
+            response.userid = userid
+            await response.save()
+            res.json({
+                message: 'User Updated Successfully',
+                body:{
+                    response
+                }
+            });
+        }else{ 
+            res.json({
+                mensaje: "El contacto ingresado no existe"
+            })
+        }
+        
     } catch (error) {
         res.status(500).json({ message: error.message});
     }
@@ -203,15 +274,28 @@ const updateContact = async (req, res) => {
 //Eliminar un contacto
 
 const deleteContact = async (req, res) => {
-    const id = parseInt(req.params.idcontact);
-    const response = await contactos.findOne({where:{id:id}});
-    await contactos.destroy({where:{id:id}})
-    res.json({
-        message: 'Se elimino correctamente al contacto',
-        body:{
-            response
+    try {
+        const id = parseInt(req.params.idcontact);
+        const response = await contactos.findOne({where:{id:id}});
+        if (response.length !== 0){
+            await contactos.destroy({where:{id:id}})
+            res.json({
+                message: 'Se elimino correctamente al contacto',
+                body:{
+                    response
+                }
+            });
+        }else{ 
+            res.json({
+                mensaje: "El contacto ingresado no existe"
+            })
         }
-    });
+        
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+
+    
 };
 
 
