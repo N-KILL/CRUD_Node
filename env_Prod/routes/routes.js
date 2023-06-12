@@ -5,6 +5,7 @@ const {
     getUsers,
     getUserById,
     getContactsByUserId,
+    getContactsByUserIdAndFav,
     createUser,
     updateUser,
     deleteUser,
@@ -55,6 +56,10 @@ router.delete('/users/:id', deleteUser);
 // Leer contactos por Id de usuario
 
 router.get('/users/contacts/:id', verifyToken ,getContactsByUserId);
+
+// Leer contactos por ID y Favoritos
+
+router.get('/users/contacts/:id/fav', verifyToken ,getContactsByUserIdAndFav);
 
 // Crear un contacto
 

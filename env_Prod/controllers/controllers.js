@@ -142,15 +142,27 @@ const getContactsByUserId =  async (req, res) => {
     })
 };
 
+//Consultar los contactos por el id del usuario y si son favoritos
+
+const getContactsByUserIdAndFav =  async (req, res) => {
+    const id = req.params.id
+    const response = await contactos.findAll({where:{userid:id,favorito:1}});
+    res.json({
+        mensaje: "Contactos: ",
+        response : response,
+    })
+};
 // Crear un contacto
 
 const createContact = async (req, res) => {
         const userId = parseInt(req.params.id);
-        const { nombre , telefono, email} = req.body;
+        const { nombre , telefono, email, direccion, favorito} = req.body;
         const response = await contactos.create({
             nombre: nombre,
             telefono: telefono,
             email:email,
+            direccion: direccion,
+            favorito: favorito,
             userid: userId
         });
         res.json({
@@ -209,6 +221,7 @@ module.exports = {
     getUsers,
     getUserById,
     getContactsByUserId,
+    getContactsByUserIdAndFav,
     createUser,
     updateUser,
     deleteUser,
