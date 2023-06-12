@@ -1,31 +1,25 @@
-const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const {
     usuarios,
     contactos,
 } = require("../models/models.js")
 
-
-//conexion con la base de datos
-
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    password: 'admin',
-    database: 'crud',
-    port: '5432'
-});
-
-//---------------------------------------------------------
 // Verificar Token JWT
 
 function verifyToken(req,res,next){
     const bearerHeader =  req.headers['authorization'];
-    if(typeof bearerHeader !== 'undefined'){
-        baererToken = bearerHeader.split(" ")[1];
-        req.token = baererToken
-        next()
-    }else{
+    try {
+        if(typeof bearerHeader !== 'undefined'){
+            baererToken = bearerHeader.split(" ")[1];
+            req.token = baererToken
+            jwt.verify(req.token, 'secretKey',(error, authData) => {
+                if (error){
+                    res.sendStatus(403);
+                }})
+            next()
+        }
+        
+    } catch (error) {
         res.sendStatus(403);
     }
 }
@@ -34,81 +28,110 @@ function verifyToken(req,res,next){
 
 const login = async (req, res) => {
     const {nombre, email} = req.body
-    const user = await pool.query("SELECT * FROM users WHERE nombre = $1 AND email = $2", [nombre, email])
-    if(user.rows.length !=0){
-        if(user.rows != 'undefined'){
-            const token = jwt.sign({
-                user: user.rows
+    const user = await usuarios.findOne({where:{nombre: nombre, email: email}})
+    if(user.dataValues !=0){
+        if(user.dataValues != 'undefined'){
+            var token = jwt.sign({
+            "nombre":user.dataValues["nombre"],
+            "email":user.dataValues["email"],
             }, "secretKey", {expiresIn: '50000s'})
             res.send({
                 token,
-                user: user.rows
-            })
-        }
-    }
-}
+                user: user
+            });
+        }};
+};
 
 
 //Consultar todos los usuarios
 
 const getUsers = async (req, res) => {
-    const response = await pool.query('SELECT * FROM users ORDER BY id ASC');
-    res.status(200).json(response.rows);
+    try {
+        const response = await usuarios.findAll()
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
 };
 
 
 //Consultar un usuario por id
 
 const getUserById = async (req, res) => {
-    const id = parseInt(req.params.id);
-    const response = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-    res.json(response.rows);
+    try {
+        const id = parseInt(req.params.id);
+        const response = await usuarios.findByPk(id);
+        res.json(response);
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
 };
 
 //Crear un usuario
 
 const createUser = async (req, res) => {
-    const { nombre , email } = req.body;
-    const response = await usuarios.create({
-        nombre: nombre,
-        email:email
-    })
-    res.json({
-        message: 'User Added successfully',
-        body: {
-            user: {nombre, email}
-        }
-    })
+
+    try {
+        const { nombre , email } = req.body;
+        const response = await usuarios.create({
+            nombre: nombre,
+            email:email
+        })
+        res.json({
+            message: 'User Added successfully',
+            body: {
+                user: response
+            }
+        })
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+    
 };
 
 
 //Editar un usuario 
 
 const updateUser = async (req, res) => {
-    const id = parseInt(req.params.id);
-    const { nombre, email } = req.body;
-
-    const response =await pool.query('UPDATE users SET nombre = $1, email = $2 WHERE id = $3', [
-        nombre,
-        email,
-        id
-    ]);
-    res.json('User Updated Successfully');
+    try {
+        const { id } = req.params;
+        const { nombre, email } = req.body;
+        const response = await usuarios.findByPk(id)
+        response.nombre = nombre
+        response.email = email
+        await response.save()
+        res.json({
+            message: 'User Updated Successfully',
+            body:{
+                response
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+    
+    
+    
 };
 
 
 //Eliminar un usuario
 
 const deleteUser = async (req, res) => {
-    const id = parseInt(req.params.id);
-    var read = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-    await pool.query('DELETE FROM users where id = $1', [
-        id
-    ]);
-    res.json({
-        mensaje: "Usuario eliminado correctamente",
-        usuario_eliminado: read.rows
-    });
+    try {
+        const id = parseInt(req.params.id);
+        await usuarios.destroy({
+            where: {
+                id: id,
+            }
+        })
+        res.json({
+            mensaje: "Usuario eliminado correctamente",
+        }); 
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+    
 };
 
 //Consultar los contactos por el id del usuario
@@ -116,59 +139,55 @@ const deleteUser = async (req, res) => {
 
 const getContactsByUserId =  async (req, res) => {
     const id = req.params.id
-    const response = await pool.query('SELECT * FROM contacts WHERE userid = $1', [id]);
-    jwt.verify(req.token, 'secretKey',(error, authData) => {
-        if (error){
-            res.sendStatus(403);
-        }else{
-            res.json({
-                mensaje: "Contactos: ",
-                response : response.rows,
-            })
-            }
-        })
+    const response = await contactos.findOne({where:{userid:id}});
+    res.json({
+        mensaje: "Contactos: ",
+        response : response,
+    })
 };
 
 // Crear un contacto
 
 const createContact = async (req, res) => {
-    const userId = parseInt(req.params.id);
-    const { nombre , telefono, email} = req.body;
-    const response = await pool.query('INSERT INTO contacts (nombre, telefono, email, userid) VALUES ($1, $2, $3, $4)', [nombre, telefono ,email, userId]);
-    jwt.verify(req.token, 'secretKey',(error, authData) => {
-        if (error){
-            res.sendStatus(403);
-        }else{
-            res.json({
-                message: 'Se añadio el contacto',
-                body: {
-                    user: response.rows
-                }});
-            };
+        const userId = parseInt(req.params.id);
+        const { nombre , telefono, email} = req.body;
+        const response = await contactos.create({
+            nombre: nombre,
+            telefono: telefono,
+            email:email,
+            userid: userId
         });
+        res.json({
+            message: 'Se añadio el contacto',
+            body: {
+                contacto: response
+            }});
 };
+
+
 
 // Editar un contacto
 
 const updateContact = async (req, res) => {
-    const id = parseInt(req.params.idcontact);
-    const { nombre, telefono ,email } = req.body;
-    response =await pool.query('UPDATE contacts SET nombre = $1, telefono = $2 ,email = $3 WHERE id = $4', [
-        nombre,
-        telefono,
-        email,
-        id
-    ]);
-    jwt.verify(req.token, 'secretKey',(error, authData) => {
-        if (error){
-            res.sendStatus(403);
-        }else{
-            res.json({
-                mensaje: 'Contacto actualizado!',
-                nombre,telefono,email
-                
-            })};
+    try {
+        const id = parseInt(req.params.idcontact);
+        const { nombre, telefono,email } = req.body;
+        console.log(nombre, telefono,email)
+        const response = await contactos.findByPk(id)
+        console.log(response)
+        response.nombre = nombre
+        response.telefono = telefono
+        response.email = email
+        await response.save()
+        res.json({
+            message: 'User Updated Successfully',
+            body:{
+                response
+            }
         });
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
 };
 
 
@@ -177,18 +196,8 @@ const updateContact = async (req, res) => {
 
 const deleteContact = async (req, res) => {
     const id = parseInt(req.params.idcontact);
-    var read = await pool.query('SELECT * FROM contacts WHERE id = $1', [id]);
-    await pool.query('DELETE FROM contacts where id = $1', [id]);
-    jwt.verify(req.token, 'secretKey',(error, authData) => {
-        if (error){
-            res.sendStatus(403);
-        }else{
-            res.json({
-                mensaje: "Se elimino correctamente el contacto:",
-                contacto_eliminado: read.rows
-            });
-            };
-        });
+    await contactos.destroy({where:{id:id}})
+    console.log("Se culiaron a carlitos")
 };
 
 
