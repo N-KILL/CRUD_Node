@@ -1,5 +1,5 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
+const env = require('./util/config')
 
 const app = express();
 
@@ -9,9 +9,9 @@ app.use(express.json());
 
 // Routes
 
-app.use(require('./routes/routes.js'));
+app.use(require('./env_Test/routes/routes.js'));
 
 // app corriendo
 
-app.listen(3000);
-console.log('Server on port', 3000);
+app.listen(env.PORT);
+console.log('Server corriendo en el puerto', env.PORT);

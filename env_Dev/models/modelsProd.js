@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../database/database.js')
+const { sequelize } = require(`../enviroments/.env.${process.env.DATABASE}`)
 
 //Modelo de usuarios
 
@@ -42,6 +42,14 @@ const contactos = sequelize.define('contacts',{
     },
     email: {
         type: DataTypes.STRING,
+        allowNull: false  
+    },
+    direccion: {
+        type: DataTypes.STRING,
+        allowNull: false  
+    },
+    favorito: {
+        type: DataTypes.TINYINT,
         allowNull: false  
     },
    
