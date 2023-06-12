@@ -146,7 +146,7 @@ const getContactsByUserId =  async (req, res) => {
 
 const getContactsByUserIdAndFav =  async (req, res) => {
     const id = req.params.id
-    const response = await contactos.findAll({where:{userid:id,favorito:1}});
+    const response = await contactos.findAll({where:{userid:id,favorito:true}});
     res.json({
         mensaje: "Contactos: ",
         response : response,
