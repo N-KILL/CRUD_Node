@@ -183,23 +183,23 @@ const getContactsByUserId =  async (req, res) => {
 //Consultar los contactos por el id del usuario y si son favoritos
 
 const getContactsByUserIdAndFav =  async (req, res) => {
+    const id = req.params.id
     try {
-        const id = req.params.id
-        const response = await contactos.findAll({where:{userid:id,favorito:true}});
-        if (response.length !== 0){
+        const verify = await usuarios.findByPk(id)
+        if (verify.length !== 0){
+            const response = await contactos.findAll({where:{userid:id,favorito:true}});
             res.json({
-                mensaje: "Contactos favoritos: ",
+                mensaje: "Contactos: ",
                 response : response,
             })
-        }else{ 
+        }else{
             res.json({
-                mensaje: "El usuario ingresado no existe"
+                mensaje: "No se encontro el usuario"
             })
         }
     } catch (error) {
         res.status(500).json({ message: error.message});
     }
-
     
 };
 // Crear un contacto
