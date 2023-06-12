@@ -6,6 +6,6 @@ const data = require('dotenv').config({
 module.exports = {
     PORT: data.parsed.PORT,
     API: data.parsed.ROOT_API,
-    DATABASE: data.parsed.DATABASE,
-    FILE_LOCATION: data.parsed.FILE_LOCATION
+    FILE_LOCATION: data.parsed.FILE_LOCATION,
+    DATABASE: data.parsed.DATABASE
 }

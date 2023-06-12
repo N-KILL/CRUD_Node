@@ -9,7 +9,7 @@ app.use(express.json());
 
 // Routes
 
-app.use(require(`${process.env.FILE_LOCATION}/routes/routes.js`))
+app.use(require(`./${process.env.FILE_LOCATION}/routes/routes.js`))
 
 // app corriendo
 

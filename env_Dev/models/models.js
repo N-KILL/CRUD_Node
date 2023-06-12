@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require(`../enviroments/.env.${process.env.DATABASE}`)
+const { sequelize } = require('../database/database.js')
 
 //Modelo de usuarios
 
