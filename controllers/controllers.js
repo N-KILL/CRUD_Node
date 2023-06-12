@@ -8,19 +8,15 @@ const {
 
 function verifyToken(req,res,next){
     const bearerHeader =  req.headers['authorization'];
-    try {
-        if(typeof bearerHeader !== 'undefined'){
-            baererToken = bearerHeader.split(" ")[1];
-            req.token = baererToken
-            jwt.verify(req.token, 'secretKey',(error, authData) => {
-                if (error){
-                    res.sendStatus(403);
-                }})
-            next()
-        }
-        
-    } catch (error) {
-        res.sendStatus(403);
+    if(typeof bearerHeader !== 'undefined'){
+        baererToken = bearerHeader.split(" ")[1];
+        req.token = baererToken
+        jwt.verify(req.token, 'secretKey',(error, authData) => {
+            if (error){
+                res.sendStatus(403);
+                exit()
+            }})
+        next()
     }
 }
 
