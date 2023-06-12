@@ -1,6 +1,5 @@
 const { Router } = require('express');
 const router = Router();
-const path = require('path');
 
 const {     
     getUsers,
@@ -25,9 +24,9 @@ router.get('/', function(req,res){
 // Login
 
 router.post("/login", login);
-// #region Usuarios
 
-// USUARIOS
+
+// #region Usuarios
 
 // Leer todos los usuarios
 
@@ -52,7 +51,6 @@ router.delete('/users/:id', deleteUser);
 // #endregion
 
 // #region Contactos
-// CONTACTOS
 
 // Leer contactos por Id de usuario
 
@@ -72,10 +70,10 @@ router.delete('/users/contacts/:id/:idcontact',verifyToken, deleteContact);
 //#endregion
 
 // EXTRAS
-
 // 404 Routes
 
 router.get("*",(req,res) => {res.send("404 - Page not found")});
 
 // Export
+
 module.exports = router;

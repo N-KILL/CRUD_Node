@@ -135,7 +135,7 @@ const deleteUser = async (req, res) => {
 
 const getContactsByUserId =  async (req, res) => {
     const id = req.params.id
-    const response = await contactos.findOne({where:{userid:id}});
+    const response = await contactos.findAll({where:{userid:id}});
     res.json({
         mensaje: "Contactos: ",
         response : response,
@@ -192,8 +192,14 @@ const updateContact = async (req, res) => {
 
 const deleteContact = async (req, res) => {
     const id = parseInt(req.params.idcontact);
+    const response = await contactos.findOne({where:{id:id}});
     await contactos.destroy({where:{id:id}})
-    console.log("Se culiaron a carlitos")
+    res.json({
+        message: 'Se elimino correctamente al contacto',
+        body:{
+            response
+        }
+    });
 };
 
 
