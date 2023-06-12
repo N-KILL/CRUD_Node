@@ -1,6 +1,10 @@
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
-const { response } = require('express');
+const {
+    usuarios,
+    contactos,
+} = require("../models/models.js")
+
 
 //conexion con la base de datos
 
@@ -12,7 +16,7 @@ const pool = new Pool({
     port: '5432'
 });
 
-
+//---------------------------------------------------------
 // Verificar Token JWT
 
 function verifyToken(req,res,next){
@@ -65,7 +69,10 @@ const getUserById = async (req, res) => {
 
 const createUser = async (req, res) => {
     const { nombre , email } = req.body;
-    const response = await pool.query('INSERT INTO users (nombre, email) VALUES ($1, $2)', [nombre, email]);
+    const response = await usuarios.create({
+        nombre: nombre,
+        email:email
+    })
     res.json({
         message: 'User Added successfully',
         body: {

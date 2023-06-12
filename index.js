@@ -1,7 +1,8 @@
-/// Dependencias: Express - PG - Jsonwebtoken
-
+/// Dependencias: Express - PG - Jsonwebtoken - Sequelize
+const { sequelize } = require('./database/database.js');
 const express = require('express');
 const jwt = require('jsonwebtoken');
+
 
 const app = express();
 

@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const path = require('path');
+
 const {     
     getUsers,
     getUserById,
@@ -14,12 +15,18 @@ const {
     login,
     verifyToken,
 } = require('../controllers/controllers.js');
+const {
+    bdd,
+} = require('../database/database.js');
 
 // index
 
 router.get('/', function(req,res){
     res.sendFile(path.join(__dirname+'/templates/index.html'));
     });
+
+//BD
+router.get('/bdd', bdd);
 
 // Login
 
