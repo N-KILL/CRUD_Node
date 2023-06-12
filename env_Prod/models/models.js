@@ -49,7 +49,7 @@ const contactos = sequelize.define('contacts',{
         allowNull: false  
     },
     favorito: {
-        type: DataTypes.TINYINT,
+        type: DataTypes.BOOLEAN,
         allowNull: false  
     },
    
