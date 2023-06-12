@@ -179,13 +179,16 @@ const createContact = async (req, res) => {
 const updateContact = async (req, res) => {
     try {
         const id = parseInt(req.params.idcontact);
-        const { nombre, telefono,email } = req.body;
+        const { nombre, telefono,email,direccion,favorito,userid} = req.body;
         console.log(nombre, telefono,email)
         const response = await contactos.findByPk(id)
         console.log(response)
         response.nombre = nombre
         response.telefono = telefono
         response.email = email
+        response.direccion = direccion,
+        response.favorito = favorito,
+        response.userid = userid
         await response.save()
         res.json({
             message: 'User Updated Successfully',
