@@ -2,7 +2,7 @@
 
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize('crud', 'postgres', 'admin', {
+const sequelize = new Sequelize('production-db', 'postgres', 'admin', {
     host: 'localhost',
     dialect: 'postgres'
   });
