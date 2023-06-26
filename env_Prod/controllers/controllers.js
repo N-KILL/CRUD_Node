@@ -23,19 +23,24 @@ function verifyToken(req,res,next){
 // Login 
 
 const login = async (req, res) => {
-    const {nombre, email} = req.body
-    const user = await usuarios.findOne({where:{nombre: nombre, email: email}})
-    if(user.dataValues !=0){
-        if(user.dataValues != 'undefined'){
-            var token = jwt.sign({
-            "nombre":user.dataValues["nombre"],
-            "email":user.dataValues["email"],
-            }, "secretKey", {expiresIn: '50000s'})
-            res.send({
-                token,
-                user: user
-            });
-        }};
+    try {
+        const {nombre, email} = req.body
+        const user = await usuarios.findOne({where:{nombre: nombre, email: email}})
+        if(user.dataValues !=0){
+            if(user.dataValues != 'undefined'){
+                var token = jwt.sign({
+                "nombre":user.dataValues["nombre"],
+                "email":user.dataValues["email"],
+                }, "secretKey", {expiresIn: '50000s'})
+                res.send({
+                    token,
+                    user: user
+                });
+            }};
+    } catch (error) {
+        res.status(500).json({ message: error.message});
+    }
+    
 };
 
 
